@@ -216,8 +216,8 @@
   <a href="#hero" class="logo">Lafontaine<span>Sec</span></a>
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#portfolio">Work</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="case-studies.html">Work</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
   <a href="#contact" class="nav-btn">Get a Quote</a>
@@ -491,9 +491,40 @@
     var fields = ['f-name','f-org','f-email','f-industry','f-tier','f-msg'];
     var missing = fields.filter(function(id) { return !document.getElementById(id).value.trim(); });
     if (missing.length) { document.getElementById(missing[0]).focus(); return; }
-    document.getElementById('success-msg').style.display = 'block';
-    fields.forEach(function(id) { document.getElementById(id).value = ''; });
-    document.getElementById('success-msg').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    var btn = document.getElementById('submitBtn');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    var data = {};
+    fields.forEach(function(id) { data[id] = document.getElementById(id).value; });
+    var phone = document.getElementById('f-phone').value;
+    if (phone) data['phone'] = phone;
+    var users = document.getElementById('f-users').value;
+    if (users) data['users'] = users;
+
+    fetch('https://formspree.io/f/xaqlqobd', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    .then(function(res) {
+      if (res.ok) {
+        document.getElementById('success-msg').style.display = 'block';
+        fields.forEach(function(id) { document.getElementById(id).value = ''; });
+        document.getElementById('f-phone').value = '';
+        document.getElementById('f-users').value = '';
+        document.getElementById('success-msg').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        btn.textContent = 'Submitted';
+      } else {
+        btn.textContent = 'Error — try again';
+        btn.disabled = false;
+      }
+    })
+    .catch(function() {
+      btn.textContent = 'Error — try again';
+      btn.disabled = false;
+    });
   });
 </script>
 </body>
